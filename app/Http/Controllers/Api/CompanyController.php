@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Rules\UniqueCompanyRule;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller
@@ -23,7 +24,12 @@ class CompanyController extends Controller
     {
         $data = $request->validate([
             'razon_social' => 'required|string|max:255',
-            'ruc' => 'required|string|max:11',
+            'ruc' => [
+                'required',
+                'string',
+                'regex:/^(10|20)\d{9}$/',
+                new UniqueCompanyRule(auth()->id()),
+            ],
             'direccion' => 'required|string|max:255',
             'logo' => 'nullable|file|image',
             'sol_user' => 'required|string|max:255',
