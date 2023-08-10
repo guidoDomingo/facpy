@@ -45,6 +45,60 @@ class InvoiceController extends Controller
         return $response;
     }
 
+    public function xml(Request $request)
+    {
+        $request->validate([
+            'company' => 'required|array',
+            'company.address' => 'required|array',
+            'client' => 'required|array',
+            'details' => 'required|array',
+            'details.*' => 'required|array',
+        ]);
+
+        $data = $request->all();
+
+        $company = Company::where('user_id', auth()->id())
+                    ->where('ruc', $data['company']['ruc'])
+                    ->firstOrFail();
+
+        $this->setTotales($data);
+        $this->setLegends($data);
+
+        $sunat = new SunatService;
+        $see = $sunat->getSee($company);
+        $invoice = $sunat->getInvoice($data);   
+
+        $response['xml'] = $see->getXmlSigned($invoice);
+        $response['hash'] = (new XmlUtils())->getHashSign($response['xml']);
+
+        return $response;
+    }
+
+    public function pdf(Request $request){
+        $request->validate([
+            'company' => 'required|array',
+            'company.address' => 'required|array',
+            'client' => 'required|array',
+            'details' => 'required|array',
+            'details.*' => 'required|array',
+        ]);
+
+        $data = $request->all();
+
+        $company = Company::where('user_id', auth()->id())
+                    ->where('ruc', $data['company']['ruc'])
+                    ->firstOrFail();
+
+        $this->setTotales($data);
+        $this->setLegends($data);
+
+        $sunat = new SunatService;
+        $see = $sunat->getSee($company);
+        $invoice = $sunat->getInvoice($data);
+
+        $pdf = $sunat->getHtmlReport($invoice);
+    }
+
     public function setTotales(&$data){
         $details = collect($data['details']);
 

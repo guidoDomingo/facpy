@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "greenter/htmltopdf": "^5.0",
         "greenter/lite": "^5.0",
         "greenter/report": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
