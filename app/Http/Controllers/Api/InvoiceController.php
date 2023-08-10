@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Services\SunatService;
 use Greenter\Report\XmlUtils;
 use Illuminate\Http\Request;
+use Luecano\NumeroALetras\NumeroALetras;
 
 class InvoiceController extends Controller
 {
@@ -19,7 +20,8 @@ class InvoiceController extends Controller
                     ->where('ruc', $data['company']['ruc'])
                     ->firstOrFail();
 
-        $this->setTotales($data);        
+        $this->setTotales($data);
+        $this->setLegends($data);
 
         $sunat = new SunatService;
         $see = $sunat->getSee($company);
@@ -54,5 +56,16 @@ class InvoiceController extends Controller
         $data['mtoImpVenta'] = floor($data['subTotal'] * 10) / 10;
 
         $data['redondeo'] = $data['mtoImpVenta'] - $data['subTotal'];
+    }
+
+    public function setLegends(&$data){
+        $formatter = new NumeroALetras();
+
+        $data['legends'] = [
+            [
+                'code' => '1000',
+                'value' => $formatter->toInvoice($data['mtoImpVenta'], 2, 'SOLES')
+            ]
+        ];
     }
 }
