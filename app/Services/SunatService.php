@@ -26,7 +26,8 @@ class SunatService
         return $see;
     }
 
-    public function getInvoice(){
+    public function getInvoice()
+    {
 
         return (new Invoice())
             ->setUblVersion('2.1')
@@ -49,7 +50,8 @@ class SunatService
             ->setLegends($this->getLegends());
     }
 
-    public function getCompany(){
+    public function getCompany()
+    {
         return (new Company())
             ->setRuc('20123456789')
             ->setRazonSocial('GREEN SAC')
@@ -57,14 +59,16 @@ class SunatService
             ->setAddress($this->getAddress());
     }
 
-    public function getClient(){
+    public function getClient()
+    {
         return (new Client())
             ->setTipoDoc('6')
             ->setNumDoc('20000000001')
             ->setRznSocial('EMPRESA X');
     }
 
-    public function getAddress(){
+    public function getAddress()
+    {
         return (new Address())
             ->setUbigueo('150101')
             ->setDepartamento('LIMA')
@@ -76,7 +80,8 @@ class SunatService
 
     }
 
-    public function getDetails(){
+    public function getDetails()
+    {
         $item = (new SaleDetail())
             ->setCodProducto('P001')
             ->setUnidad('NIU') // Unidad - Catalog. 03
@@ -101,5 +106,34 @@ class SunatService
             ->setValue('SON DOSCIENTOS TREINTA Y SEIS CON 00/100 SOLES');
 
         return [$legend];
+    }
+
+    public function sunatResponse($result)
+    {
+
+        $response['success'] = $result->isSuccess();
+
+        // Verificamos que la conexión con SUNAT fue exitosa.
+        if (!$response['success']) {
+
+            $response['error'] = [
+                'code' => $result->getError()->getCode(),
+                'message' => $result->getError()->getMessage()
+            ];
+
+            return $response;
+        }
+
+        $response['cdrZip'] = base64_encode($result->getCdrZip());
+
+        $cdr = $result->getCdrResponse();
+
+        $response['cdrResponse'] = [
+            'code' => (int)$cdr->getCode(),
+            'description' => $cdr->getDescription(),
+            'notes' => $cdr->getNotes()
+        ];
+
+        return $response;
     }
 }
