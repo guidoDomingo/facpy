@@ -51,6 +51,7 @@ class SunatService
             //Impuestos
             ->setMtoIGV($data['mtoIGV'])
             ->setMtoIGVGratuitas($data['mtoIGVGratuitas'])
+            ->setIcbper($data['icbper'])
             ->setTotalImpuestos($data['totalImpuestos'])
 
             //Totales
@@ -110,6 +111,8 @@ class SunatService
                 ->setMtoBaseIgv($detail['mtoBaseIgv'])
                 ->setPorcentajeIgv($detail['porcentajeIgv']) // 18%
                 ->setIgv($detail['igv'])
+                ->setFactorIcbper($detail['factorIcbper'] ?? null) // 0.3%
+                ->setIcbper($detail['icbper'] ?? null)
                 ->setTipAfeIgv($detail['tipAfeIgv']) // Gravado Op. Onerosa - Catalog. 07
                 ->setTotalImpuestos($detail['totalImpuestos']) // Suma de impuestos en el detalle
                 ->setMtoValorVenta($detail['mtoValorVenta'])
