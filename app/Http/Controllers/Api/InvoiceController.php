@@ -13,12 +13,16 @@ class InvoiceController extends Controller
     public function send(Request $request)
     {
 
-        $company = Company::where('user_id', auth()->id())->firstOrFail();
+        $data = $request->all();
+
+        $company = Company::where('user_id', auth()->id())
+                    ->where('ruc', $data['company']['ruc'])
+                    ->firstOrFail();
 
         $sunat = new SunatService;
         $see = $sunat->getSee($company);
 
-        $invoice = $sunat->getInvoice();
+        $invoice = $sunat->getInvoice($data);
 
         $result = $see->send($invoice);
 
