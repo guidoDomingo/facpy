@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Login Paraguay SIFEN</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇵🇾 Paraguay SIFEN API - Test Login</h1>
+        
+        <div>
+            <h3>1. Test de Conectividad</h3>
+            <button onclick="testConnection()">Test Conexión</button>
+            <div id="connectionResult" class="result"></div>
+        </div>
+
+        <div>
+            <h3>2. Crear Usuario de Prueba</h3>
+            <button onclick="createTestUser()">Crear Usuario Admin</button>
+            <div id="createUserResult" class="result"></div>
+        </div>
+
+        <div>
+            <h3>3. Test Login</h3>
+            <input type="email" id="email" placeholder="Email" value="admin@test.com">
+            <input type="password" id="password" placeholder="Password" value="password123">
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <div>
+            <h3>4. Test Empresas (Requiere Login)</h3>
+            <button onclick="testCompanies()">Listar Empresas</button>
+            <div id="companiesResult" class="result"></div>
+        </div>
+
+        <div>
+            <h3>5. Info del Sistema</h3>
+            <button onclick="testSystemInfo()">Info Sistema</button>
+            <div id="systemResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api';
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('connectionResult');
+            try {
+                const response = await fetch(`${API_BASE}/test/connection`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Conexión exitosa: ${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error ${response.status}: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Guardar el token automáticamente
+                    if (data.access_token) {
+                        localStorage.setItem('jwt_token', data.access_token);
+                        localStorage.setItem('user_id', data.user.id);
+                    }
+                    resultDiv.innerHTML = `<div class="success">✅ Login exitoso: ${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error ${response.status}: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function testCompanies() {
+            const resultDiv = document.getElementById('companiesResult');
+            const token = localStorage.getItem('jwt_token');
+
+            if (!token) {
+                resultDiv.innerHTML = `<div class="error">❌ No hay token JWT. Haz login primero.</div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/companies`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Empresas obtenidas: ${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error ${response.status}: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function createTestUser() {
+            const resultDiv = document.getElementById('createUserResult');
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Admin Paraguay SIFEN',
+                        email: 'admin@test.com',
+                        password: 'password123',
+                        password_confirmation: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Usuario creado: ${JSON.stringify(data, null, 2)}</div>`;
+                    
+                    // Si el usuario se creó correctamente, crear también la empresa
+                    if (data.user && data.user.id) {
+                        await createTestCompany(data.user.id);
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error ${response.status}: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+
+        async function createTestCompany(userId) {
+            try {
+                const response = await fetch(`${API_BASE}/test/create-company`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    console.log('✅ Empresa creada automáticamente:', data);
+                } else {
+                    console.log('❌ Error al crear empresa:', data);
+                }
+            } catch (error) {
+                console.log('❌ Error al crear empresa:', error.message);
+            }
+        }
+
+        async function testSystemInfo() {
+            const resultDiv = document.getElementById('systemResult');
+            try {
+                const response = await fetch(`${API_BASE}/test/system`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Sistema info: ${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error ${response.status}: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error de conexión: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

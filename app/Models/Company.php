@@ -14,13 +14,25 @@ class Company extends Model
         'ruc',
         'direccion',
         'logo_path',
+        'cert_path',
+        'cert_password',
+        'production',
+        'user_id',
+        // Campos específicos para Paraguay (SIFEN)
+        'nombre_fantasia',
+        'codigo_departamento',
+        'departamento',
+        'codigo_distrito',
+        'distrito',
+        'codigo_ciudad',
+        'ciudad',
+        'numero_casa',
+        'punto_expedicion',
+        // Campos legacy (compatibilidad)
         'sol_user',
         'sol_pass',
-        'cert_path',
         'client_id',
-        'client_secret',
-        'production',
-        'user_id'
+        'client_secret'
     ];
 
     public function user()

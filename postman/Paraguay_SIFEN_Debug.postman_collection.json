@@ -1,0 +1,113 @@
+{
+    "info": {
+        "name": "Paraguay SIFEN API - Debug Version",
+        "description": "🇵🇾 Colección de debug para Paraguay SIFEN e-Kuatia\n\n⚠️ IMPORTANTE: Incluye endpoints de debug para resolver problemas de creación de usuarios",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost/curso-greenter/public/api",
+            "type": "string"
+        },
+        {
+            "key": "jwt_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "0. Tests de Debug",
+            "item": [
+                {
+                    "name": "Test Básico",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/test/basic",
+                            "host": ["{{base_url}}"],
+                            "path": ["test", "basic"]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear Usuario Simple",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User Simple\",\n    \"email\": \"test-simple@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/test/simple-create-user",
+                            "host": ["{{base_url}}"],
+                            "path": ["test", "simple-create-user"]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear Usuario Original",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User Original\",\n    \"email\": \"test-original@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/test/create-user",
+                            "host": ["{{base_url}}"],
+                            "path": ["test", "create-user"]
+                        }
+                    }
+                },
+                {
+                    "name": "System Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/test/system",
+                            "host": ["{{base_url}}"],
+                            "path": ["test", "system"]
+                        }
+                    }
+                },
+                {
+                    "name": "Debug Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/test/debug",
+                            "host": ["{{base_url}}"],
+                            "path": ["test", "debug"]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

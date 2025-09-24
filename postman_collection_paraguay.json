@@ -1,0 +1,825 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Facturación Electrónica Paraguay - SIFEN",
+		"description": "Colección completa para probar el sistema de facturación electrónica de Paraguay integrado con SIFEN e-Kuatia.\n\n🇵🇾 **Sistema exclusivo para Paraguay**\n- SIFEN e-Kuatia\n- Moneda: PYG (Guaraníes)\n- IVA: 10% y 5%\n- CDC: 44 dígitos\n\n## Variables necesarias:\n- `base_url`: http://localhost:8000\n- `token`: Se obtiene del login\n\n## Orden de ejecución:\n1. Test Sistema\n2. Test Conexión SIFEN\n3. Login\n4. Crear/Listar Empresas\n5. Generar Facturas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🔍 Tests del Sistema",
+			"item": [
+				{
+					"name": "Info del Sistema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is JSON\", function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"System is Paraguay\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.country).to.eql(\"Paraguay\");",
+									"    pm.expect(jsonData.currency).to.eql(\"PYG\");",
+									"    pm.expect(jsonData.system_name).to.include(\"SIFEN\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"system"
+							]
+						},
+						"description": "Obtiene información general del sistema de facturación Paraguay"
+					},
+					"response": []
+				},
+				{
+					"name": "Test Conexión SIFEN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"SIFEN connection test successful\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('cdc');",
+									"    pm.expect(jsonData.data.cdc).to.have.lengthOf(44);",
+									"});",
+									"",
+									"pm.test(\"Company data exists\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.company).to.have.property('ruc');",
+									"    pm.expect(jsonData.data.company.ruc).to.match(/^\\d{8}-\\d$/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test/connection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"connection"
+							]
+						},
+						"description": "Prueba la conexión con SIFEN y genera un CDC de ejemplo"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para verificar que el sistema funcione correctamente"
+		},
+		{
+			"name": "🔐 Autenticación",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Token received\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('access_token');",
+									"    pm.expect(jsonData.access_token).to.be.a('string');",
+									"    ",
+									"    // Guardar token para otras requests",
+									"    pm.collectionVariables.set('token', jsonData.access_token);",
+									"});",
+									"",
+									"pm.test(\"Token type is bearer\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token_type).to.eql('bearer');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@paraguay.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						},
+						"description": "Inicia sesión y obtiene el token JWT para acceder a los endpoints protegidos"
+					},
+					"response": []
+				},
+				{
+					"name": "Mi Perfil",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User data received\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('email');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"me"
+							]
+						},
+						"description": "Obtiene información del usuario autenticado"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"logout"
+							]
+						},
+						"description": "Cierra sesión e invalida el token actual"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticación JWT"
+		},
+		{
+			"name": "🏢 Empresas Paraguay",
+			"item": [
+				{
+					"name": "Listar Empresas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Companies list received\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    ",
+									"    if (jsonData.data.length > 0) {",
+									"        // Guardar ID de la primera empresa para otras requests",
+									"        pm.collectionVariables.set('company_id', jsonData.data[0].id);",
+									"        ",
+									"        // Verificar formato RUC Paraguay",
+									"        pm.expect(jsonData.data[0].ruc).to.match(/^\\d{8}-\\d$/);",
+									"        pm.expect(jsonData.data[0]).to.have.property('departamento');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/companies",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"companies"
+							]
+						},
+						"description": "Lista todas las empresas paraguayas registradas"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Empresa Paraguay",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Company created with Paraguay data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('ruc');",
+									"    pm.expect(jsonData.data).to.have.property('departamento');",
+									"    pm.expect(jsonData.data).to.have.property('punto_expedicion');",
+									"    pm.expect(jsonData.data.punto_expedicion).to.eql('001');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"razon_social\": \"Nueva Empresa Paraguay SRL\",\n    \"ruc\": \"80555666-7\",\n    \"nombre_fantasia\": \"Nueva Empresa PY\",\n    \"direccion\": \"Av. Mariscal López 890\",\n    \"codigo_departamento\": \"11\",\n    \"departamento\": \"CAPITAL\",\n    \"codigo_distrito\": \"1\",\n    \"distrito\": \"ASUNCIÓN\",\n    \"codigo_ciudad\": \"1\",\n    \"ciudad\": \"ASUNCIÓN\",\n    \"numero_casa\": \"890\",\n    \"punto_expedicion\": \"001\",\n    \"production\": false,\n    \"cert_path\": \"\",\n    \"sol_user\": \"\",\n    \"sol_pass\": \"\",\n    \"client_id\": \"\",\n    \"client_secret\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/companies",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"companies"
+							]
+						},
+						"description": "Crea una nueva empresa con todos los campos específicos de Paraguay"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Empresa",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/companies/{{company_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"companies",
+								"{{company_id}}"
+							]
+						},
+						"description": "Obtiene los detalles de una empresa específica"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de empresas con datos específicos de Paraguay"
+		},
+		{
+			"name": "📄 Facturación SIFEN",
+			"item": [
+				{
+					"name": "Generar XML Factura",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"XML generated successfully\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('xml');",
+									"    pm.expect(jsonData.data).to.have.property('cdc');",
+									"    pm.expect(jsonData.data.cdc).to.have.lengthOf(44);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"tipoDocumento\": \"01\",\n    \"serie\": \"001\",\n    \"numero\": \"0000001\",\n    \"fechaEmision\": \"2025-09-24\",\n    \"receptor\": {\n        \"ruc\": \"80024242-1\",\n        \"razonSocial\": \"Cliente Ejemplo Paraguay SA\",\n        \"direccion\": \"Av. Ejemplo 456, Asunción, Paraguay\"\n    },\n    \"items\": [\n        {\n            \"descripcion\": \"Producto Paraguay 1\",\n            \"cantidad\": 2,\n            \"precioUnitario\": 50000,\n            \"tipoIva\": \"10\"\n        },\n        {\n            \"descripcion\": \"Servicio Paraguay 1\",\n            \"cantidad\": 1,\n            \"precioUnitario\": 100000,\n            \"tipoIva\": \"5\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/xml",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"xml"
+							]
+						},
+						"description": "Genera el XML de una factura según el formato SIFEN e-Kuatia"
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar Factura a SIFEN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Invoice sent to SIFEN\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('cdc');",
+									"    ",
+									"    // Guardar CDC para consultas posteriores",
+									"    if (jsonData.data.cdc) {",
+									"        pm.collectionVariables.set('cdc', jsonData.data.cdc);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"tipoDocumento\": \"01\",\n    \"serie\": \"001\",\n    \"numero\": \"0000002\",\n    \"fechaEmision\": \"2025-09-24\",\n    \"receptor\": {\n        \"ruc\": \"80024242-1\",\n        \"razonSocial\": \"Empresa Receptora Paraguay SA\",\n        \"direccion\": \"Mcal. Estigarribia 789, Asunción\"\n    },\n    \"items\": [\n        {\n            \"descripcion\": \"Producto con IVA 10%\",\n            \"cantidad\": 3,\n            \"precioUnitario\": 33000,\n            \"tipoIva\": \"10\"\n        },\n        {\n            \"descripcion\": \"Producto con IVA 5%\",\n            \"cantidad\": 1,\n            \"precioUnitario\": 21000,\n            \"tipoIva\": \"5\"\n        },\n        {\n            \"descripcion\": \"Producto Exento\",\n            \"cantidad\": 2,\n            \"precioUnitario\": 15000,\n            \"tipoIva\": \"0\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Envía una factura completa al sistema SIFEN para su procesamiento"
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Estado Documento",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Document status received\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('status');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cdc\": \"{{cdc}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"status"
+							]
+						},
+						"description": "Consulta el estado de un documento electrónico en SIFEN usando su CDC"
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Reporte",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"fecha_desde\": \"2025-09-01\",\n    \"fecha_hasta\": \"2025-09-30\",\n    \"tipo_documento\": \"01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"report"
+							]
+						},
+						"description": "Genera un reporte de documentos electrónicos emitidos"
+					},
+					"response": []
+				},
+				{
+					"name": "Configuración SIFEN",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices/config",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"config"
+							]
+						},
+						"description": "Obtiene la configuración actual del sistema SIFEN"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para generar y enviar documentos electrónicos a SIFEN"
+		},
+		{
+			"name": "📊 Ejemplos Específicos Paraguay",
+			"item": [
+				{
+					"name": "Factura IVA Mixto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"tipoDocumento\": \"01\",\n    \"serie\": \"001\",\n    \"numero\": \"0000123\",\n    \"fechaEmision\": \"2025-09-24\",\n    \"receptor\": {\n        \"ruc\": \"80123123-4\",\n        \"razonSocial\": \"Comercial Paraguaya LTDA\",\n        \"direccion\": \"España 567, Ciudad del Este, Alto Paraná\"\n    },\n    \"items\": [\n        {\n            \"descripcion\": \"Arroz 5kg (IVA 10%)\",\n            \"cantidad\": 10,\n            \"precioUnitario\": 22000,\n            \"tipoIva\": \"10\"\n        },\n        {\n            \"descripcion\": \"Leche 1L (IVA 5%)\",\n            \"cantidad\": 20,\n            \"precioUnitario\": 6300,\n            \"tipoIva\": \"5\"\n        },\n        {\n            \"descripcion\": \"Medicamentos (Exento)\",\n            \"cantidad\": 5,\n            \"precioUnitario\": 15000,\n            \"tipoIva\": \"0\"\n        }\n    ],\n    \"observaciones\": \"Factura con productos de diferentes categorías IVA - Paraguay\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Ejemplo de factura con productos que tienen diferentes tasas de IVA (10%, 5% y exento) según la legislación paraguaya"
+					},
+					"response": []
+				},
+				{
+					"name": "Autofactura Electrónica",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"tipoDocumento\": \"04\",\n    \"serie\": \"001\",\n    \"numero\": \"0000045\",\n    \"fechaEmision\": \"2025-09-24\",\n    \"receptor\": {\n        \"ruc\": \"12345678-9\",\n        \"razonSocial\": \"Persona Física Paraguay\",\n        \"direccion\": \"Barrio San Vicente, Luque, Central\"\n    },\n    \"items\": [\n        {\n            \"descripcion\": \"Servicios profesionales\",\n            \"cantidad\": 1,\n            \"precioUnitario\": 500000,\n            \"tipoIva\": \"10\"\n        }\n    ],\n    \"observaciones\": \"Autofactura por servicios profesionales según Art. 105 Ley 125/91\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Ejemplo de autofactura electrónica (tipo 04) para servicios profesionales en Paraguay"
+					},
+					"response": []
+				},
+				{
+					"name": "Nota de Crédito",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": {{company_id}},\n    \"tipoDocumento\": \"05\",\n    \"serie\": \"001\",\n    \"numero\": \"0000010\",\n    \"fechaEmision\": \"2025-09-24\",\n    \"documentoReferencia\": {\n        \"cdc\": \"01080123456700120250920001000000011234567890\",\n        \"motivo\": \"Devolución por producto defectuoso\"\n    },\n    \"receptor\": {\n        \"ruc\": \"80024242-1\",\n        \"razonSocial\": \"Cliente Paraguay SA\",\n        \"direccion\": \"Av. Artigas 123, Asunción\"\n    },\n    \"items\": [\n        {\n            \"descripcion\": \"Devolución - Producto defectuoso\",\n            \"cantidad\": 1,\n            \"precioUnitario\": -110000,\n            \"tipoIva\": \"10\"\n        }\n    ],\n    \"observaciones\": \"Nota de crédito por devolución - Art. 113 RG 70/2013\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Ejemplo de nota de crédito electrónica (tipo 05) por devolución de productos"
+					},
+					"response": []
+				}
+			],
+			"description": "Ejemplos específicos de documentos según la legislación tributaria paraguaya"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Verificar que las variables estén configuradas",
+					"if (!pm.collectionVariables.get('base_url')) {",
+					"    pm.collectionVariables.set('base_url', 'http://localhost:8000');",
+					"    console.log('Base URL set to default: http://localhost:8000');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Logging global para debugging",
+					"console.log('Response status:', pm.response.status());",
+					"console.log('Response time:', pm.response.responseTime + 'ms');",
+					"",
+					"// Verificar que la respuesta sea JSON válido",
+					"if (pm.response.headers.get('Content-Type') && pm.response.headers.get('Content-Type').includes('application/json')) {",
+					"    try {",
+					"        const jsonData = pm.response.json();",
+					"        console.log('Response data:', JSON.stringify(jsonData, null, 2).substring(0, 500) + '...');",
+					"    } catch (e) {",
+					"        console.log('Error parsing JSON:', e.message);",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "company_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cdc",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

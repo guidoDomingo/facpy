@@ -1,0 +1,312 @@
+{
+  "info": {
+    "name": "Facturación Electrónica Multi-País",
+    "description": "Colección para testing de facturación electrónica de Perú y Paraguay",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Facturación Unificada",
+      "item": [
+        {
+          "name": "Obtener Información Empresa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/info?company_ruc=20123456789",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "info"],
+              "query": [
+                {
+                  "key": "company_ruc",
+                  "value": "20123456789"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enviar Factura Perú",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_ruc\": \"20123456789\",\n  \"document_type\": \"01\",\n  \"series\": \"F001\",\n  \"number\": \"00000001\",\n  \"issue_date\": \"2024-01-15\",\n  \"currency\": \"PEN\",\n  \"customer\": {\n    \"ruc\": \"20123456788\",\n    \"razonSocial\": \"Cliente Ejemplo SAC\",\n    \"direccion\": \"Av. Cliente 123, Lima\"\n  },\n  \"items\": [\n    {\n      \"description\": \"Servicio de consultoría\",\n      \"quantity\": 1,\n      \"unit_price\": 1000.00,\n      \"code\": \"SERV001\",\n      \"unit\": \"NIU\",\n      \"tax_exempt\": false,\n      \"tax_rate\": 18\n    },\n    {\n      \"description\": \"Producto ejemplo\",\n      \"quantity\": 2,\n      \"unit_price\": 500.00,\n      \"code\": \"PROD001\",\n      \"unit\": \"NIU\",\n      \"tax_exempt\": false,\n      \"tax_rate\": 18\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/send",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "send"]
+            }
+          }
+        },
+        {
+          "name": "Enviar Factura Paraguay",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_ruc\": \"80123456-7\",\n  \"document_type\": \"1\",\n  \"series\": \"001\",\n  \"number\": \"0000001\",\n  \"issue_date\": \"2024-01-15\",\n  \"currency\": \"PYG\",\n  \"customer\": {\n    \"ruc\": \"80123456-8\",\n    \"razonSocial\": \"Cliente Paraguay SRL\",\n    \"direccion\": \"Av. Mariscal López 123, Asunción\"\n  },\n  \"items\": [\n    {\n      \"description\": \"Servicio de desarrollo\",\n      \"quantity\": 1,\n      \"unit_price\": 5000000,\n      \"code\": \"SERV001\",\n      \"unit\": \"77\",\n      \"tax_exempt\": false,\n      \"tax_rate\": 10\n    },\n    {\n      \"description\": \"Licencia de software\",\n      \"quantity\": 3,\n      \"unit_price\": 2000000,\n      \"code\": \"LIC001\",\n      \"unit\": \"77\",\n      \"tax_exempt\": false,\n      \"tax_rate\": 10\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/send",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "send"]
+            }
+          }
+        },
+        {
+          "name": "Generar XML",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_ruc\": \"20123456789\",\n  \"document_type\": \"01\",\n  \"series\": \"F001\",\n  \"number\": \"00000002\",\n  \"issue_date\": \"2024-01-15\",\n  \"items\": [\n    {\n      \"description\": \"Producto de prueba\",\n      \"quantity\": 1,\n      \"unit_price\": 100.00,\n      \"tax_rate\": 18\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/xml",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "xml"]
+            }
+          }
+        },
+        {
+          "name": "Generar Reporte HTML",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_ruc\": \"20123456789\",\n  \"document_type\": \"01\",\n  \"series\": \"F001\",\n  \"number\": \"00000003\",\n  \"issue_date\": \"2024-01-15\",\n  \"format\": \"html\",\n  \"items\": [\n    {\n      \"description\": \"Producto para reporte\",\n      \"quantity\": 2,\n      \"unit_price\": 250.00,\n      \"tax_rate\": 18\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/report",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "report"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SIFEN Paraguay (Específico)",
+      "item": [
+        {
+          "name": "Configuración SIFEN",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sifen/config?ruc=80123456-7",
+              "host": ["{{base_url}}"],
+              "path": ["sifen", "config"],
+              "query": [
+                {
+                  "key": "ruc",
+                  "value": "80123456-7"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enviar Documento SIFEN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emisor\": {\n    \"ruc\": \"80123456-7\",\n    \"razonSocial\": \"Mi Empresa SRL\",\n    \"nombreFantasia\": \"Mi Empresa\",\n    \"direccion\": \"Av. Eusebio Ayala 123\",\n    \"codigoDepartamento\": \"11\",\n    \"departamento\": \"CAPITAL\",\n    \"codigoDistrito\": \"1\",\n    \"distrito\": \"ASUNCIÓN\",\n    \"codigoCiudad\": \"1\",\n    \"ciudad\": \"ASUNCIÓN\",\n    \"numeroCasa\": \"123\"\n  },\n  \"numeroDocumento\": \"0000001\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"receptor\": {\n    \"ruc\": \"80123456-8\",\n    \"razonSocial\": \"Cliente Paraguay SRL\",\n    \"direccion\": \"Av. Mariscal López 456\"\n  },\n  \"items\": [\n    {\n      \"descripcion\": \"Servicio profesional\",\n      \"cantidad\": 1,\n      \"precioUnitario\": 3000000,\n      \"unidadMedida\": \"77\",\n      \"exentoIva\": false,\n      \"tasaIva\": 10\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sifen/send",
+              "host": ["{{base_url}}"],
+              "path": ["sifen", "send"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Estado Documento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cdc\": \"01801234567001000000120240115001234567890123456\",\n  \"ruc\": \"80123456-7\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sifen/status",
+              "host": ["{{base_url}}"],
+              "path": ["sifen", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SUNAT Perú (Original)",
+      "item": [
+        {
+          "name": "Enviar Factura SUNAT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ublVersion\": \"2.1\",\n  \"tipoOperacion\": \"0101\",\n  \"tipoDoc\": \"01\",\n  \"serie\": \"F001\",\n  \"correlativo\": \"000001\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"tipoMoneda\": \"PEN\",\n  \"company\": {\n    \"ruc\": \"20123456789\",\n    \"razonSocial\": \"Mi Empresa SAC\",\n    \"nombreComercial\": \"Mi Empresa\",\n    \"address\": {\n      \"direccion\": \"Av. Lima 123\",\n      \"departamento\": \"LIMA\",\n      \"provincia\": \"LIMA\",\n      \"distrito\": \"LIMA\",\n      \"ubigueo\": \"150101\",\n      \"codLocal\": \"0000\"\n    }\n  },\n  \"client\": {\n    \"tipoDoc\": \"6\",\n    \"numDoc\": \"20123456788\",\n    \"rznSocial\": \"Cliente SAC\"\n  },\n  \"details\": [\n    {\n      \"codProducto\": \"PROD001\",\n      \"unidad\": \"NIU\",\n      \"cantidad\": 1,\n      \"mtoValorUnitario\": 100.00,\n      \"descripcion\": \"Producto de prueba\",\n      \"mtoBaseIgv\": 100.00,\n      \"porcentajeIgv\": 18,\n      \"igv\": 18.00,\n      \"tipAfeIgv\": \"10\",\n      \"totalImpuestos\": 18.00,\n      \"mtoValorVenta\": 100.00,\n      \"mtoPrecioUnitario\": 118.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/invoices/send",
+              "host": ["{{base_url}}"],
+              "path": ["invoices", "send"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gestión de Empresas",
+      "item": [
+        {
+          "name": "Listar Empresas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/companies",
+              "host": ["{{base_url}}"],
+              "path": ["companies"]
+            }
+          }
+        },
+        {
+          "name": "Crear Empresa Peruana",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruc\": \"20123456789\",\n  \"razon_social\": \"Mi Empresa Peruana SAC\",\n  \"direccion\": \"Av. Lima 123, Lima\",\n  \"sol_user\": \"MODDATOS\",\n  \"sol_pass\": \"moddatos\",\n  \"cert_path\": \"certificates/certificado_peru.pfx\",\n  \"pais\": \"PE\",\n  \"production\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/companies",
+              "host": ["{{base_url}}"],
+              "path": ["companies"]
+            }
+          }
+        },
+        {
+          "name": "Crear Empresa Paraguaya",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruc\": \"80123456-7\",\n  \"razon_social\": \"Mi Empresa Paraguaya SRL\",\n  \"nombre_fantasia\": \"Mi Empresa PY\",\n  \"direccion\": \"Av. Eusebio Ayala 123\",\n  \"cert_path\": \"certificates/certificado_paraguay.p12\",\n  \"cert_password\": \"mi_password\",\n  \"codigo_departamento\": \"11\",\n  \"departamento\": \"CAPITAL\",\n  \"codigo_distrito\": \"1\",\n  \"distrito\": \"ASUNCIÓN\",\n  \"codigo_ciudad\": \"1\",\n  \"ciudad\": \"ASUNCIÓN\",\n  \"numero_casa\": \"123\",\n  \"punto_expedicion\": \"001\",\n  \"pais\": \"PY\",\n  \"production\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/companies",
+              "host": ["{{base_url}}"],
+              "path": ["companies"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

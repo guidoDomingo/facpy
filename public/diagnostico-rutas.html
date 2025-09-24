@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico de Rutas - Paraguay SIFEN</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico de Rutas API - Paraguay SIFEN</h1>
+    
+    <div class="test">
+        <h3>1. Test Rutas Sin Autenticación</h3>
+        <button onclick="testRoute('/api/test/system', 'GET')">Test System</button>
+        <button onclick="testRoute('/api/test/connection', 'GET')">Test Connection</button>
+        <button onclick="testRoute('/api/test/sifen-test', 'GET')">Test SifenController</button>
+        <div id="noauth-result"></div>
+    </div>
+
+    <div class="test">
+        <h3>2. Test Login</h3>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="login-result"></div>l
+    </div>
+
+    <div class="test">
+        <h3>3. Test XML SIN Autenticación</h3>
+        <button onclick="testRoute('/api/test/xml-without-auth', 'POST')">Test XML Sin Auth</button>
+        <div id="xml-result"></div>
+    </div>
+
+    <div class="test">
+        <h3>4. Test Rutas con Autenticación</h3>
+        <button onclick="testRoute('/api/companies', 'GET', true)">Test Companies</button>
+        <button onclick="testRoute('/api/invoices/xml', 'POST', true, getXmlPayload())">Test Invoices XML</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="test">
+        <h3>5. Variables de Postman</h3>
+        <p><strong>base_url:</strong> <code>http://127.0.0.1:8000/api</code></p>
+        <p><strong>URL completa:</strong> <code>http://127.0.0.1:8000/api/invoices/xml</code></p>
+        <p><strong>jwt_token:</strong> <span id="current-token">No disponible</span></p>
+    </div>
+
+    <script>
+        let jwtToken = '';
+
+        async function testRoute(path, method = 'GET', needsAuth = false, payload = null) {
+            let resultDiv;
+            if (path.includes('xml-without-auth')) {
+                resultDiv = document.getElementById('xml-result');
+            } else if (needsAuth) {
+                resultDiv = document.getElementById('auth-result');
+            } else {
+                resultDiv = document.getElementById('noauth-result');
+            }
+            const url = `http://127.0.0.1:8000${path}`;
+            
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+
+            if (needsAuth && jwtToken) {
+                headers['Authorization'] = `Bearer ${jwtToken}`;
+            }
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (payload && (method === 'POST' || method === 'PUT')) {
+                options.body = JSON.stringify(payload);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json().catch(() => ({ message: 'No JSON response' }));
+                
+                const statusClass = response.ok ? 'success' : 'error';
+                resultDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        <strong>${method} ${path}</strong><br>
+                        Status: ${response.status} ${response.statusText}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error de Conexión</strong><br>
+                        ${error.message}<br>
+                        URL: ${url}
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-result');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@test.com',
+                        password: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.access_token) {
+                    jwtToken = data.access_token;
+                    document.getElementById('current-token').textContent = `${jwtToken.substring(0, 50)}...`;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>Login Exitoso</strong><br>
+                            Token guardado para pruebas de rutas autenticadas
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>Error de Login</strong><br>
+                            Status: ${response.status}<br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error de Conexión</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function getXmlPayload() {
+            return {
+                company_id: 1,
+                tipoDocumento: "01",
+                serie: "001",
+                numero: "000000001",
+                fechaEmision: "2024-01-15",
+                receptor: {
+                    ruc: "80012345-1",
+                    razonSocial: "Cliente Test Paraguay S.A.",
+                    direccion: "Av. Mariscal López 1234, Asunción"
+                },
+                items: [
+                    {
+                        descripcion: "Producto Test Paraguay",
+                        cantidad: 2,
+                        precioUnitario: 50000,
+                        tipoIva: "10"
+                    }
+                ]
+            };
+        }
+    </script>
+</body>
+</html>

@@ -17,7 +17,13 @@ class CompanyController extends Controller
         $companies = Company::where('user_id', auth()->id())
             ->get();
 
-        return response()->json($companies, 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Empresas del usuario para Paraguay SIFEN',
+            'companies' => $companies,
+            'count' => $companies->count(),
+            'user_id' => auth()->id(),
+        ], 200);
     }
 
     /**

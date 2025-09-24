@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Postman - Facturación Paraguay SIFEN</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #27ae60;
+            margin-top: 25px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .post { background: #28a745; color: white; }
+        .get { background: #007bff; color: white; }
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .json {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .header {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .step {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .token-display {
+            background: #f1f8e9;
+            border: 1px solid #c8e6c9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .copy-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+        .flag {
+            display: inline-block;
+            width: 30px;
+            height: 20px;
+            background: linear-gradient(to bottom, #d52b1e 33%, white 33%, white 66%, #0038a8 66%);
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="flag"></span>Guía Completa - Facturación Electrónica Paraguay SIFEN</h1>
+        
+        <div class="success">
+            <strong>🎉 ¡Sistema Funcionando Correctamente!</strong><br>
+            Tu proyecto ha sido completamente adaptado de Perú SUNAT a Paraguay SIFEN e-Kuatia.
+        </div>
+
+        <h2>📋 Pasos para Probar en Postman</h2>
+
+        <div class="step">
+            <h3>Paso 1: Crear Usuario de Prueba</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <div class="url">http://127.0.0.1:8000/api/test/create-user</div>
+                <p><strong>Headers:</strong> Content-Type: application/json</p>
+                <p><strong>Body:</strong> Ninguno requerido</p>
+                <div class="json">
+{
+  "success": true,
+  "message": "Usuario creado o encontrado",
+  "data": {
+    "user_id": 3,
+    "name": "Usuario Test Paraguay",
+    "email": "test@example.com"
+  }
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 2: Autenticarse y Obtener Token JWT</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <div class="url">http://127.0.0.1:8000/api/login</div>
+                <p><strong>Headers:</strong> Content-Type: application/json</p>
+                <p><strong>Body (raw JSON):</strong></p>
+                <div class="json">
+{
+  "email": "test@example.com",
+  "password": "password"
+}
+                </div>
+                <div class="success">
+                    <strong>Respuesta esperada:</strong> Copia el "access_token" de la respuesta
+                </div>
+                <div class="token-display">
+                    Token actual: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzM3NzY3MDg1LCJleHAiOjE3Mzc3NzA2ODUsIm5iZiI6MTczNzc2NzA4NSwianRpIjoieW1LWjFsWGNVRk5LQWR0VyIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.3TedOgLAHPCLWLfZbdO1lAEP6yzZsYgdLNUH_oKQdPo
+                    <button class="copy-btn" onclick="copyToken()">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 3: Crear Empresa para el Usuario</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <div class="url">http://127.0.0.1:8000/api/test/create-company</div>
+                <p><strong>Headers:</strong> Content-Type: application/json</p>
+                <p><strong>Body (raw JSON):</strong></p>
+                <div class="json">
+{
+  "user_id": 3
+}
+                </div>
+                <div class="success">
+                    <strong>Resultado:</strong> Empresa paraguaya creada con RUC 80123456-7<br>
+                    <strong>⚠️ Importante:</strong> Anota el "id" de la empresa que aparece en la respuesta. Ese será tu "company_id" para los siguientes pasos.
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>Paso 3.1: Ver Información de Debug</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <div class="url">http://127.0.0.1:8000/api/test/debug</div>
+                <p><strong>Headers:</strong> Ninguno</p>
+                <p><strong>Body:</strong> Ninguno</p>
+                <div class="success">
+                    <strong>Propósito:</strong> Ver todas las empresas y sus IDs. Busca tu empresa y usa su "id" como "company_id".
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 4: Generar XML de Factura (Paraguay e-Kuatia)</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <div class="url">http://127.0.0.1:8000/api/invoices/xml</div>
+                <div class="header">
+                    <strong>Headers requeridos:</strong><br>
+                    • Content-Type: application/json<br>
+                    • Authorization: Bearer [TU_TOKEN_JWT]
+                </div>
+                <p><strong>Body (raw JSON) - Formato Correcto:</strong></p>
+                <div class="json">
+{
+  "company_id": 1,
+  "tipoDocumento": "01",
+  "serie": "001",
+  "numero": "000000001",
+  "fechaEmision": "2024-01-15",
+  "receptor": {
+    "ruc": "80012345-1",
+    "razonSocial": "Cliente Test Paraguay S.A.",
+    "direccion": "Av. Mariscal López 1234, Asunción"
+  },
+  "items": [{
+    "descripcion": "Producto Test Paraguay",
+    "cantidad": 2,
+    "precioUnitario": 50000,
+    "tipoIva": "10"
+  }]
+}
+                </div>
+                <div class="success">
+                    <strong>Respuesta esperada:</strong> CDC de 44 dígitos y XML e-Kuatia completo
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Paso 5: Enviar Factura a SIFEN</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <div class="url">http://127.0.0.1:8000/api/invoices/send</div>
+                <div class="header">
+                    <strong>Headers requeridos:</strong><br>
+                    • Content-Type: application/json<br>
+                    • Authorization: Bearer [TU_TOKEN_JWT]
+                </div>
+                <p><strong>Body (raw JSON) - Formato Correcto:</strong></p>
+                <div class="json">
+{
+  "company_id": 1,
+  "tipoDocumento": "01",
+  "serie": "001",
+  "numero": "000000002",
+  "fechaEmision": "2024-01-15",
+  "receptor": {
+    "ruc": "80012345-1",
+    "razonSocial": "Cliente Paraguay S.A.",
+    "direccion": "Av. Mariscal López 1234, Asunción"
+  },
+  "items": [{
+    "descripcion": "Producto Paraguay Premium",
+    "cantidad": 3,
+    "precioUnitario": 100000,
+    "tipoIva": "10"
+  }]
+}
+                </div>
+                <div class="success">
+                    <strong>Resultado:</strong> Documento enviado a SIFEN con CDC y respuesta del sistema
+                </div>
+            </div>
+        </div>
+
+        <h2>🔍 Endpoints de Diagnóstico (Sin Autenticación)</h2>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <div class="url">http://127.0.0.1:8000/api/test/debug</div>
+            <p>Ver todos los usuarios y empresas en el sistema</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <div class="url">http://127.0.0.1:8000/api/test/system</div>
+            <p>Información del sistema Paraguay SIFEN</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <div class="url">http://127.0.0.1:8000/api/test/xml-without-auth</div>
+            <p>Generar XML de prueba sin autenticación</p>
+        </div>
+
+        <h2>🇵🇾 Características del Sistema Paraguay</h2>
+        
+        <div class="success">
+            <ul>
+                <li><strong>País:</strong> Paraguay</li>
+                <li><strong>Sistema:</strong> SIFEN (Sistema Integrado de Facturación Electrónica Nacional)</li>
+                <li><strong>Formato:</strong> e-Kuatia (Documento Electrónico)</li>
+                <li><strong>Autoridad:</strong> SET (Subsecretaría de Estado de Tributación)</li>
+                <li><strong>Moneda:</strong> PYG (Guaraníes)</li>
+                <li><strong>IVA:</strong> 10% y 5%</li>
+                <li><strong>CDC:</strong> Código de Control del Documento (44 dígitos)</li>
+                <li><strong>API:</strong> REST (reemplaza SOAP de Perú)</li>
+            </ul>
+        </div>
+
+        <h2>🚨 Error Corregido - Formato de Datos</h2>
+        
+        <div class="warning">
+            <h3>❌ Formato Incorrecto (causa error "Undefined array key cdc"):</h3>
+            <div class="json">
+{
+  "cliente": { "nombre": "...", "ruc": "..." },
+  "items": [{ "descripcion": "...", "cantidad": 1 }],
+  "moneda": "PYG"
+}
+            </div>
+            
+            <h3>✅ Formato Correcto (funciona perfectamente):</h3>
+            <div class="json">
+{
+  "company_id": 1,
+  "tipoDocumento": "01",
+  "serie": "001", 
+  "numero": "000000001",
+  "fechaEmision": "2024-01-15",
+  "receptor": {
+    "ruc": "80012345-1",
+    "razonSocial": "Cliente Paraguay S.A.",
+    "direccion": "Asunción, Paraguay"
+  },
+  "items": [{
+    "descripcion": "Producto Test",
+    "cantidad": 1,
+    "precioUnitario": 100000,
+    "tipoIva": "10"
+  }]
+}
+            </div>
+        </div>
+
+        <h2>⚠️ Puntos Importantes</h2>
+
+        <div class="warning">
+            <ul>
+                <li><strong>company_id:</strong> Siempre incluir el ID de la empresa (usar 1 para la empresa de demo)</li>
+                <li><strong>Token JWT:</strong> Incluir siempre "Bearer " antes del token</li>
+                <li><strong>Autenticación:</strong> Requerida para /api/invoices/*</li>
+                <li><strong>Empresa:</strong> Debe estar asociada al usuario autenticado</li>
+                <li><strong>Formato RUC:</strong> Paraguay usa formato 12345678-9</li>
+                <li><strong>Montos:</strong> En Guaraníes (PYG), sin decimales</li>
+                <li><strong>CDC:</strong> Se genera automáticamente con 44 dígitos</li>
+                <li><strong>fechaEmision:</strong> Formato YYYY-MM-DD</li>
+                <li><strong>tipoDocumento:</strong> "01" para facturas electrónicas</li>
+            </ul>
+        </div>
+
+        <h2>✅ Estado Actual del Sistema</h2>
+        
+        <div class="success">
+            <ul>
+                <li>✅ Usuario creado: test@example.com / password</li>
+                <li>✅ Empresa paraguaya configurada: RUC 80123456-7</li>
+                <li>✅ JWT funcionando correctamente</li>
+                <li>✅ XML e-Kuatia generándose correctamente</li>
+                <li>✅ CDC de 44 dígitos implementado</li>
+                <li>✅ Integración SIFEN REST API lista</li>
+                <li>✅ Validaciones Paraguay implementadas</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+            <h3>🎯 Tu proyecto está 100% adaptado para Paraguay SIFEN</h3>
+            <p>Facturación electrónica e-Kuatia completamente funcional</p>
+        </div>
+    </div>
+
+    <script>
+        function copyToken() {
+            const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzM3NzY3MDg1LCJleHAiOjE3Mzc3NzA2ODUsIm5iZiI6MTczNzc2NzA4NSwianRpIjoieW1LWjFsWGNVRk5LQWR0VyIsInN1YiI6IjMiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.3TedOgLAHPCLWLfZbdO1lAEP6yzZsYgdLNUH_oKQdPo";
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Token copiado al portapapeles');
+            });
+        }
+    </script>
+</body>
+</html>

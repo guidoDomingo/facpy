@@ -1,0 +1,710 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+		"name": "Paraguay SIFEN - Facturación Electrónica",
+		"description": "Colección completa para probar el sistema de facturación electrónica Paraguay SIFEN e-Kuatia adaptado desde Perú SUNAT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "company_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🚀 Setup - Configuración Inicial",
+			"item": [
+				{
+					"name": "1. Crear Usuario de Prueba",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.user_id) {",
+									"        pm.collectionVariables.set('user_id', response.data.user_id);",
+									"        console.log('✅ Usuario creado, ID:', response.data.user_id);",
+									"    }",
+									"}",
+									"",
+									"pm.test('Usuario creado correctamente', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/test/create-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"create-user"
+							]
+						},
+						"description": "Crea un usuario de prueba para el sistema Paraguay SIFEN"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login y Obtener JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.access_token) {",
+									"        pm.collectionVariables.set('jwt_token', response.access_token);",
+									"        console.log('✅ Token JWT obtenido y guardado');",
+									"    }",
+									"}",
+									"",
+									"pm.test('Autenticación exitosa', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.access_token).to.not.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Autenticación con email y password, obtiene JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "3. Crear Empresa Paraguay",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.company && response.company.id) {",
+									"        pm.collectionVariables.set('company_id', response.company.id);",
+									"        console.log('✅ Empresa creada, ID:', response.company.id);",
+									"    }",
+									"}",
+									"",
+									"pm.test('Empresa creada correctamente', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": {{user_id}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/test/create-company",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"create-company"
+							]
+						},
+						"description": "Crea una empresa paraguaya con RUC 80123456-7 asociada al usuario"
+					},
+					"response": []
+				},
+				{
+					"name": "4. Debug - Ver Datos del Sistema",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test/debug",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"debug"
+							]
+						},
+						"description": "Ver usuarios y empresas creadas en el sistema"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para configurar el sistema inicial: usuario, autenticación y empresa"
+		},
+		{
+			"name": "🇵🇾 Paraguay SIFEN - Facturación",
+			"item": [
+				{
+					"name": "Generar XML e-Kuatia",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('XML generado correctamente', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.cdc).to.have.lengthOf(44);",
+									"    pm.expect(response.xml).to.include('rDE');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ CDC generado:', response.cdc);",
+									"    console.log('✅ XML e-Kuatia generado correctamente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_id\": {{company_id}},\n  \"tipoDocumento\": \"01\",\n  \"serie\": \"001\",\n  \"numero\": \"000000001\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"receptor\": {\n    \"ruc\": \"80012345-1\",\n    \"razonSocial\": \"Cliente Test Paraguay S.A.\",\n    \"direccion\": \"Av. Mariscal López 1234, Asunción\"\n  },\n  \"items\": [{\n    \"descripcion\": \"Producto Test Paraguay\",\n    \"cantidad\": 2,\n    \"precioUnitario\": 50000,\n    \"tipoIva\": \"10\"\n  }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/invoices/xml",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"invoices",
+								"xml"
+							]
+						},
+						"description": "Genera XML e-Kuatia para Paraguay SIFEN con CDC de 44 dígitos"
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar Factura a SIFEN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Factura enviada a SIFEN', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.cdc).to.have.lengthOf(44);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Factura enviada a SIFEN');",
+									"    console.log('📄 CDC:', response.cdc);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_id\": {{company_id}},\n  \"tipoDocumento\": \"01\",\n  \"serie\": \"001\",\n  \"numero\": \"000000002\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"receptor\": {\n    \"ruc\": \"80012345-1\",\n    \"razonSocial\": \"Cliente Paraguay S.A.\",\n    \"direccion\": \"Av. Mariscal López 1234, Asunción\"\n  },\n  \"items\": [{\n    \"descripcion\": \"Producto Paraguay Premium\",\n    \"cantidad\": 3,\n    \"precioUnitario\": 100000,\n    \"tipoIva\": \"10\"\n  }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Envía factura electrónica al sistema SIFEN de Paraguay"
+					},
+					"response": []
+				},
+				{
+					"name": "Factura con IVA 5%",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Factura IVA 5% procesada', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.cdc).to.have.lengthOf(44);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_id\": {{company_id}},\n  \"tipoDocumento\": \"01\",\n  \"serie\": \"001\",\n  \"numero\": \"000000003\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"receptor\": {\n    \"ruc\": \"80098765-4\",\n    \"razonSocial\": \"Cliente IVA 5% SRL\",\n    \"direccion\": \"San Lorenzo, Paraguay\"\n  },\n  \"items\": [{\n    \"descripcion\": \"Servicio Básico Paraguay\",\n    \"cantidad\": 1,\n    \"precioUnitario\": 200000,\n    \"tipoIva\": \"5\"\n  }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Ejemplo de factura con IVA 5% (productos básicos)"
+					},
+					"response": []
+				},
+				{
+					"name": "Factura Múltiples Items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Factura múltiples items procesada', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.cdc).to.have.lengthOf(44);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_id\": {{company_id}},\n  \"tipoDocumento\": \"01\",\n  \"serie\": \"001\",\n  \"numero\": \"000000004\",\n  \"fechaEmision\": \"2024-01-15\",\n  \"receptor\": {\n    \"ruc\": \"80087654-3\",\n    \"razonSocial\": \"Empresa Múltiples Items SA\",\n    \"direccion\": \"Ciudad del Este, Paraguay\"\n  },\n  \"items\": [\n    {\n      \"descripcion\": \"Producto Premium Paraguay\",\n      \"cantidad\": 5,\n      \"precioUnitario\": 80000,\n      \"tipoIva\": \"10\"\n    },\n    {\n      \"descripcion\": \"Servicio Consultoría\",\n      \"cantidad\": 2,\n      \"precioUnitario\": 150000,\n      \"tipoIva\": \"10\"\n    },\n    {\n      \"descripcion\": \"Producto Básico\",\n      \"cantidad\": 10,\n      \"precioUnitario\": 25000,\n      \"tipoIva\": \"5\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/invoices/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"invoices",
+								"send"
+							]
+						},
+						"description": "Factura con múltiples items con diferentes tipos de IVA"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints principales para la facturación electrónica Paraguay SIFEN"
+		},
+		{
+			"name": "🔍 Diagnóstico y Testing",
+			"item": [
+				{
+					"name": "Sistema Info Paraguay",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"system"
+							]
+						},
+						"description": "Información del sistema Paraguay SIFEN"
+					},
+					"response": []
+				},
+				{
+					"name": "XML Sin Autenticación (Debug)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/test/xml-without-auth",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"xml-without-auth"
+							]
+						},
+						"description": "Generar XML de prueba sin autenticación para debugging"
+					},
+					"response": []
+				},
+				{
+					"name": "Ping Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test/ping",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"test",
+								"ping"
+							]
+						},
+						"description": "Test de conectividad básica"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de diagnóstico y testing del sistema"
+		},
+		{
+			"name": "🔐 Autenticación",
+			"item": [
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.access_token) {",
+									"        pm.collectionVariables.set('jwt_token', response.access_token);",
+									"        console.log('✅ Token JWT renovado');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"refresh"
+							]
+						},
+						"description": "Renovar token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Mi Perfil (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"me"
+							]
+						},
+						"description": "Obtener información del usuario logueado"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "Cerrar sesión y invalidar token"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de gestión de autenticación JWT"
+		}
+	]
+}
