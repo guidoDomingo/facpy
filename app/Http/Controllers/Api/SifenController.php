@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Services\SifenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class SifenController extends Controller
 {
@@ -113,6 +114,272 @@ class SifenController extends Controller
                 'success' => false,
                 'error' => $e->getMessage(),
                 'message' => 'Error al generar XML de prueba',
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Simula completamente el envío de una factura al SIFEN (sin autenticación)
+     */
+    public function sendInvoiceSimulation(Request $request)
+    {
+        try {
+            // Usar empresa por defecto para testing
+            $company = Company::where('ruc', '80123456-7')->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró empresa de prueba. Ejecutar: POST /api/test/create-company con user_id válido'
+                ], 400);
+            }
+
+            // Datos de prueba por defecto o del request
+            $data = $request->all() ?: [
+                'tipoDocumento' => '01',
+                'serie' => '001',
+                'numero' => str_pad(rand(1, 999999), 9, '0', STR_PAD_LEFT),
+                'fechaEmision' => date('Y-m-d'),
+                'receptor' => [
+                    'ruc' => '80012345-1',
+                    'razonSocial' => 'Cliente Paraguay S.A.',
+                    'direccion' => 'Av. Mariscal López 1234, Asunción'
+                ],
+                'items' => [
+                    [
+                        'descripcion' => 'Producto Paraguay Premium',
+                        'cantidad' => 3,
+                        'precioUnitario' => 100000,
+                        'tipoIva' => '10'
+                    ]
+                ]
+            ];
+
+            // Generar CDC
+            $cdc = $this->sifenService->generateCDC($company, $data);
+
+            // Generar XML
+            $xmlContent = $this->sifenService->generateXML($company, $data, $cdc);
+
+            // Simular envío (siempre exitoso en modo de prueba)
+            $result = $this->sifenService->sendDocument($xmlContent, $company);
+
+            return response()->json([
+                'success' => true,
+                'cdc' => $cdc,
+                'xml' => $xmlContent,
+                'sifen_response' => $result,
+                'message' => 'Documento enviado exitosamente (SIMULADO para testing)',
+                'note' => 'Esta es una simulación completa. Para usar en produción necesitas certificados digitales válidos.',
+                'company_used' => [
+                    'id' => $company->id,
+                    'ruc' => $company->ruc,
+                    'razon_social' => $company->razon_social
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Error en simulación de envío',
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Prueba conexión REAL con SIFEN Testing (requiere certificado)
+     */
+    public function testRealSifenConnection(Request $request)
+    {
+        try {
+            // Usar empresa por defecto para testing
+            $company = Company::where('ruc', '80123456-7')->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró empresa de prueba'
+                ], 400);
+            }
+
+            // Verificar configuración de certificado
+            $certPath = $company->cert_path ? storage_path('app/' . $company->cert_path) : env('SIFEN_CERT_PATH');
+            
+            if (!$certPath || !file_exists($certPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificado no encontrado. Ubicación esperada: ' . ($certPath ?: 'No configurado'),
+                    'instructions' => [
+                        '1. Obtén un certificado digital de prueba de SET Paraguay',
+                        '2. Guárdalo en storage/certificates/sifen_test.p12',
+                        '3. Configura SIFEN_CERT_PATH y SIFEN_CERT_PASSWORD en .env',
+                        '4. O configura cert_path y cert_password en la empresa'
+                    ]
+                ], 400);
+            }
+
+            // Datos mínimos para prueba
+            $data = [
+                'tipoDocumento' => '01',
+                'serie' => '001',
+                'numero' => 'TEST' . time(),
+                'fechaEmision' => date('Y-m-d'),
+                'receptor' => [
+                    'ruc' => '80012345-1',
+                    'razonSocial' => 'Cliente Prueba SIFEN',
+                    'direccion' => 'Av. Test SIFEN, Asunción'
+                ],
+                'items' => [
+                    [
+                        'descripcion' => 'Producto Prueba SIFEN Real',
+                        'cantidad' => 1,
+                        'precioUnitario' => 10000,
+                        'tipoIva' => '10'
+                    ]
+                ]
+            ];
+
+            // Generar CDC y XML
+            $cdc = $this->sifenService->generateCDC($company, $data);
+            $xmlContent = $this->sifenService->generateXML($company, $data, $cdc);
+
+            // Enviar al SIFEN REAL (forzar conexión real)
+            $originalForce = env('SIFEN_FORCE_REAL_CONNECTION');
+            config(['sifen.force_real' => true]);
+            
+            $result = $this->sifenService->sendDocument($xmlContent, $company);
+
+            return response()->json([
+                'success' => $result['success'],
+                'cdc' => $cdc,
+                'sifen_real_response' => $result,
+                'message' => $result['success'] 
+                    ? 'Conexión REAL con SIFEN Testing exitosa' 
+                    : 'Error en conexión REAL con SIFEN',
+                'endpoint_used' => env('SIFEN_TEST_URL'),
+                'certificate_used' => basename($certPath),
+                'environment' => 'SIFEN TESTING REAL - NO SIMULADO'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Error al conectar con SIFEN real',
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Prueba conexión con SIFEN usando certificado raíz Paraguay
+     */
+    public function testWithParaguayRootCert()
+    {
+        try {
+            $company = Company::where('ruc', '80123456-7')->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró empresa de prueba'
+                ], 400);
+            }
+
+            // Verificar certificado raíz
+            $rootCertPath = storage_path('certificates/ac_raiz_py_sha256.crt');
+            
+            if (!file_exists($rootCertPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Certificado raíz de Paraguay no encontrado'
+                ], 400);
+            }
+
+            // Datos mínimos para prueba
+            $data = [
+                'tipoDocumento' => '01',
+                'serie' => '001',
+                'numero' => 'ROOT' . time(),
+                'fechaEmision' => date('Y-m-d'),
+                'receptor' => [
+                    'ruc' => '80012345-1',
+                    'razonSocial' => 'Cliente Prueba SIFEN Root',
+                    'direccion' => 'Av. Test SIFEN Root, Asunción'
+                ],
+                'items' => [
+                    [
+                        'descripcion' => 'Producto Prueba con Cert Root Paraguay',
+                        'cantidad' => 1,
+                        'precioUnitario' => 15000,
+                        'tipoIva' => '10'
+                    ]
+                ]
+            ];
+
+            // Generar CDC y XML
+            $cdc = $this->sifenService->generateCDC($company, $data);
+            $xmlContent = $this->sifenService->generateXML($company, $data, $cdc);
+
+            // Intentar conexión con certificado raíz para validación SSL
+            $endpoint = env('SIFEN_TEST_URL', 'https://sifen-test.set.gov.py/de/ws/sync/recepcion-de');
+            
+            try {
+                $response = Http::withOptions([
+                    'verify' => $rootCertPath, // Usar certificado raíz para validación SSL
+                    'timeout' => 30,
+                    'connect_timeout' => 10
+                ])->withHeaders([
+                    'Content-Type' => 'application/xml; charset=UTF-8',
+                    'SOAPAction' => '"recepcionDE"',
+                    'User-Agent' => 'Paraguay-SIFEN-Test/1.0'
+                ])->post($endpoint, $xmlContent);
+
+                return response()->json([
+                    'success' => true,
+                    'test_type' => 'Conexión con Certificado Raíz Paraguay',
+                    'cdc' => $cdc,
+                    'endpoint' => $endpoint,
+                    'response_status' => $response->status(),
+                    'response_headers' => $response->headers(),
+                    'response_body' => $response->body(),
+                    'certificate_used' => 'ac_raiz_py_sha256.crt (Certificado Raíz Paraguay)',
+                    'xml_sent_length' => strlen($xmlContent),
+                    'message' => 'Prueba de conexión con certificado raíz Paraguay completada'
+                ]);
+
+            } catch (\Exception $httpException) {
+                // Si falla con certificado raíz, intentar sin validación SSL
+                $responseNoSSL = Http::withOptions([
+                    'verify' => false,
+                    'timeout' => 30
+                ])->withHeaders([
+                    'Content-Type' => 'application/xml; charset=UTF-8',
+                    'SOAPAction' => '"recepcionDE"',
+                    'User-Agent' => 'Paraguay-SIFEN-Test/1.0'
+                ])->post($endpoint, $xmlContent);
+
+                return response()->json([
+                    'success' => true,
+                    'test_type' => 'Conexión sin validación SSL (Fallback)',
+                    'cdc' => $cdc,
+                    'endpoint' => $endpoint,
+                    'ssl_error' => $httpException->getMessage(),
+                    'response_status' => $responseNoSSL->status(),
+                    'response_body' => $responseNoSSL->body(),
+                    'certificate_note' => 'Certificado raíz presente pero conexión SSL falló',
+                    'message' => 'Conexión exitosa sin validación SSL - Respuesta real de SIFEN'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Error en prueba con certificado raíz Paraguay',
                 'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }

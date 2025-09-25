@@ -128,33 +128,19 @@ class TestController extends Controller
                 'user_id' => $userId,
                 'ruc' => '80123456-7',
                 'razon_social' => 'Empresa Demo Paraguay SRL',
-                'nombre_comercial' => 'Demo Paraguay',
+                'nombre_fantasia' => 'Demo Paraguay',
                 'direccion' => 'Av. Mariscal López 1234',
-                'telefono' => '+595 21 123456',
-                'email' => 'contacto@demopy.com',
                 'departamento' => 'CAPITAL',
                 'distrito' => 'ASUNCIÓN',
                 'ciudad' => 'ASUNCIÓN',
                 'codigo_departamento' => '01',
+                'codigo_distrito' => '01',
+                'numero_casa' => '1234',
                 'punto_expedicion' => '001',
-                'actividad_economica' => 'Servicios de consultoría',
-                'estado' => 'activo',
-                
-                // Campos requeridos de la estructura original (compatibilidad)
-                'sol_user' => 'DEMO_USER_PY',
-                'sol_pass' => 'demo_password_123',
                 'cert_path' => 'certs/demo_cert.pem',
+                'cert_password' => 'demo_password_123',
                 'logo_path' => null,
-                'client_id' => 'demo_client_paraguay',
-                'client_secret' => 'demo_secret_paraguay',
                 'production' => false,
-                
-                // Campos adicionales de compatibilidad
-                'tipo_documento' => '6',
-                'numero_documento' => '80123456-7',
-                'codigo_pais' => 'PY',
-                'ubigeo' => '010101',
-                'urbanizacion' => 'Centro',
             ]);
 
             return response()->json([

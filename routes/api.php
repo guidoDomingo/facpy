@@ -40,6 +40,9 @@ Route::post('test/simple-create-user', [TestController::class, 'simpleCreateUser
 Route::post('test/basic', [TestController::class, 'basicTest']);
 Route::get('test/sifen-test', [SifenController::class, 'testRoute']);
 Route::post('test/xml-without-auth', [SifenController::class, 'generateXmlTest']);
+Route::post('test/send-invoice-simulation', [SifenController::class, 'sendInvoiceSimulation']);
+Route::post('test/sifen-real-connection', [SifenController::class, 'testRealSifenConnection']);
+Route::get('test/sifen-with-root-cert', [SifenController::class, 'testWithParaguayRootCert']);
 
 // Rutas principales de facturación electrónica (Paraguay SIFEN)
 Route::middleware('auth:api')->group(function () {

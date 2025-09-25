@@ -198,14 +198,45 @@ class SifenService
         try {
             $config = $this->configureSifen($company);
             
-            // Aquí deberías implementar la lógica de firma digital del XML
+            // Si está forzado usar conexión real o hay certificado válido, usar servidor real
+            $forceReal = env('SIFEN_FORCE_REAL_CONNECTION', false);
+            $hasCert = $company->cert_path && file_exists(storage_path('app/' . $company->cert_path));
+            
+            if (!$forceReal && !$company->production && !$hasCert) {
+                return $this->simulateTestResponse($xmlContent);
+            }
+            
+            // Firmar el XML con el certificado
             $signedXml = $this->signXML($xmlContent, $config);
             
+            // Configurar endpoint correcto
+            $endpoint = $company->production 
+                ? env('SIFEN_PROD_URL', 'https://sifen.set.gov.py/de/ws/sync/recepcion-de')
+                : env('SIFEN_TEST_URL', 'https://sifen-test.set.gov.py/de/ws/sync/recepcion-de');
+            
+            // Configurar certificado
+            $certPath = $company->cert_path ? storage_path('app/' . $company->cert_path) : env('SIFEN_CERT_PATH');
+            $certPassword = $company->cert_password ?: env('SIFEN_CERT_PASSWORD');
+            
+            // Opciones de conexión para SIFEN real
+            $options = [
+                'verify' => !$company->production, // false para testing, true para producción
+                'timeout' => 60,
+                'connect_timeout' => 30
+            ];
+            
+            // Agregar certificado si existe
+            if ($certPath && file_exists($certPath)) {
+                $options['cert'] = [$certPath, $certPassword];
+            }
+            
             // Envío al endpoint de SIFEN
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/xml',
-                'SOAPAction' => 'recepcionDE'
-            ])->post($this->baseUrl . 'sync', $signedXml);
+            $response = Http::withOptions($options)->withHeaders([
+                'Content-Type' => 'application/xml; charset=UTF-8',
+                'SOAPAction' => '"recepcionDE"',
+                'User-Agent' => 'Paraguay-SIFEN-Client/1.0',
+                'Accept' => 'application/xml, text/xml'
+            ])->post($endpoint, $signedXml);
 
             return [
                 'success' => $response->successful(),
@@ -221,6 +252,38 @@ class SifenService
                 'xml_sent' => $xmlContent ?? null
             ];
         }
+    }
+
+    /**
+     * Simula una respuesta exitosa para testing
+     */
+    private function simulateTestResponse($xmlContent)
+    {
+        // Extraer CDC del XML para la respuesta
+        $cdc = 'No disponible';
+        if (preg_match('/<dCDC>([^<]+)<\/dCDC>/', $xmlContent, $matches)) {
+            $cdc = $matches[1];
+        }
+        
+        return [
+            'success' => true,
+            'status_code' => 200,
+            'response' => '<?xml version="1.0" encoding="UTF-8"?>
+                <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                    <soap:Body>
+                        <ns2:rResEnviDE xmlns:ns2="http://ekuatia.set.gov.py/sifen/xsd">
+                            <ns2:dFecProc>' . date('Y-m-d\TH:i:s') . '</ns2:dFecProc>
+                            <ns2:dCodRes>0260</ns2:dCodRes>
+                            <ns2:dMsgRes>Documento electrónico procesado exitosamente en ambiente de PRUEBA - Paraguay SIFEN</ns2:dMsgRes>
+                            <ns2:dProtAut>' . date('Ymd') . time() . rand(1000, 9999) . '</ns2:dProtAut>
+                            <ns2:dCDC>' . $cdc . '</ns2:dCDC>
+                        </ns2:rResEnviDE>
+                    </soap:Body>
+                </soap:Envelope>',
+            'xml_sent' => $xmlContent,
+            'simulated' => true,
+            'note' => 'Esta es una respuesta simulada para testing. En producción se requiere certificado digital válido.'
+        ];
     }
 
     /**

@@ -28,11 +28,6 @@ class Company extends Model
         'ciudad',
         'numero_casa',
         'punto_expedicion',
-        // Campos legacy (compatibilidad)
-        'sol_user',
-        'sol_pass',
-        'client_id',
-        'client_secret'
     ];
 
     public function user()

@@ -42,11 +42,6 @@ class ParaguaySeeder extends Seeder
                 'production' => false,
                 'user_id' => $user->id,
                 'cert_path' => '',
-                // Campos legacy que podrían ser requeridos
-                'sol_user' => '',
-                'sol_pass' => '',
-                'client_id' => '',
-                'client_secret' => '',
             ]
         );
 
@@ -68,11 +63,6 @@ class ParaguaySeeder extends Seeder
                 'production' => false,
                 'user_id' => $user->id,
                 'cert_path' => '',
-                // Campos legacy que podrían ser requeridos
-                'sol_user' => '',
-                'sol_pass' => '',
-                'client_id' => '',
-                'client_secret' => '',
             ]
         );
 
