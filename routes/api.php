@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SifenController;
+use App\Http\Controllers\Api\SifenAdvancedController;
 use App\Http\Controllers\Api\TestController;
 use App\Models\Company;
 use Illuminate\Http\Request;
@@ -51,4 +52,18 @@ Route::middleware('auth:api')->group(function () {
     Route::post('invoices/report', [SifenController::class, 'generateReport']);
     Route::post('invoices/status', [SifenController::class, 'queryStatus']);
     Route::get('invoices/config', [SifenController::class, 'getConfig']);
+    
+    // Rutas avanzadas SIFEN
+    Route::post('sifen/cancel-document', [SifenAdvancedController::class, 'cancelDocument']);
+    Route::post('sifen/inutilize-range', [SifenAdvancedController::class, 'inutilizeRange']);
+    Route::post('sifen/create-nce', [SifenAdvancedController::class, 'createNCE']);
+    Route::post('sifen/generate-kude', [SifenAdvancedController::class, 'generateKuDE']);
+    Route::post('sifen/consult-document', [SifenAdvancedController::class, 'consultDocument']);
+    Route::post('sifen/validate-ruc', [SifenAdvancedController::class, 'validateRUC']);
+    Route::post('sifen/send-batch', [SifenAdvancedController::class, 'sendBatch']);
+    Route::post('sifen/consult-batch', [SifenAdvancedController::class, 'consultBatch']);
+    Route::post('sifen/upload-certificate', [SifenAdvancedController::class, 'uploadCertificate']);
+    Route::get('sifen/document-events/{cdc}', [SifenAdvancedController::class, 'getDocumentEvents']);
+    Route::post('sifen/process-event-batch', [SifenAdvancedController::class, 'processEventBatch']);
+    Route::get('sifen/stats', [SifenAdvancedController::class, 'getStats']);
 });

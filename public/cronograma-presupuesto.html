@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Implementación SIFEN Paraguay - Presupuesto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,100 0,0 1000,0 1000,80 900,100"/></svg>');
+            background-size: cover;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .budget-badge {
+            background: #ff6b6b;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .project-info {
+            padding: 30px 40px;
+            background: #f8f9ff;
+            border-bottom: 1px solid #e1e8f0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h3 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .timeline {
+            padding: 40px;
+        }
+
+        .timeline-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .timeline-header h2 {
+            color: #2d3748;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .phase {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .phase::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 60px;
+            bottom: -20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #e2e8f0);
+        }
+
+        .phase:last-child::before {
+            display: none;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .phase-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .phase-info {
+            flex: 1;
+        }
+
+        .phase-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .phase-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .meta-icon {
+            margin-right: 5px;
+        }
+
+        .phase-budget {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+            color: #22543d;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-left: 20px;
+        }
+
+        .tasks-container {
+            margin-left: 80px;
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .task-description {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .task-details {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .task-time, .task-resource {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 15px;
+        }
+
+        .task-time {
+            background: #e6fffa;
+            color: #234e52;
+            border: 1px solid #b2f5ea;
+        }
+
+        .task-resource {
+            background: #fef5e7;
+            color: #744210;
+            border: 1px solid #f6e05e;
+        }
+
+        .deliverables {
+            margin-top: 20px;
+        }
+
+        .deliverables h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .deliverable-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .deliverable-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .cost-summary {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            padding: 40px;
+            margin-top: 40px;
+        }
+
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .cost-card {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .cost-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #68d391;
+        }
+
+        .cost-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .total-cost {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .total-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #68d391;
+            margin-bottom: 10px;
+        }
+
+        .payment-terms {
+            background: #f0fff4;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .payment-terms h3 {
+            color: #22543d;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .payment-schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #68d391;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .assumptions {
+            background: #fffbf0;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 1px solid #f6e05e;
+        }
+
+        .assumptions h3 {
+            color: #744210;
+            margin-bottom: 20px;
+        }
+
+        .assumptions ul {
+            list-style-position: inside;
+            color: #744210;
+        }
+
+        .assumptions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .timeline {
+                padding: 20px;
+            }
+
+            .tasks-container {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+
+            .phase-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .phase-number {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .phase-budget {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Cronograma de Implementación</h1>
+            <div class="subtitle">Sistema de Facturación Electrónica SIFEN Paraguay</div>
+            <div class="budget-badge">PROPUESTA DE PRESUPUESTO</div>
+        </div>
+
+        <!-- Project Information -->
+        <div class="project-info">
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📋 Alcance del Proyecto</h3>
+                    <p>Implementación completa del sistema SIFEN Paraguay con todas las funcionalidades requeridas por la SET, incluyendo generación XML v150, firma digital, KuDE, NCE y eventos.</p>
+                </div>
+                <div class="info-card">
+                    <h3>⏱️ Duración Total</h3>
+                    <p>12 semanas (3 meses) desde el inicio del proyecto hasta la puesta en producción y certificación oficial con el SET Paraguay.</p>
+                </div>
+                <div class="info-card">
+                    <h3>👥 Equipo de Trabajo</h3>
+                    <p>1 Desarrollador Senior Full-Stack especializado en sistemas fiscales y facturación electrónica con experiencia en integración SIFEN.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🎯 Metodología</h3>
+                    <p>Desarrollo iterativo con entregas semanales, testing continuo y documentación completa para facilitar mantenimiento y escalabilidad.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+            <div class="timeline-header">
+                <h2>📅 Cronograma Detallado de Implementación</h2>
+                <p style="color: #718096; margin-top: 10px;">Planificación completa por fases con tareas, tiempos y entregables</p>
+            </div>
+
+            <!-- FASE 1: ANÁLISIS Y ARQUITECTURA -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-number">1</div>
+                    <div class="phase-info">
+                        <div class="phase-title">🔍 Análisis y Arquitectura Base</div>
+                        <div class="phase-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>Semanas 1-2 (10 días hábiles)</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👤</span>
+                                <span>1 Desarrollador Senior</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⚡</span>
+                                <span>80 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase-budget">
+                        <div style="font-size: 1.2rem;">$2,400</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">USD</div>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <div class="task-icon">📋</div>
+                            <div class="task-content">
+                                <div class="task-title">Análisis de Especificaciones SIFEN</div>
+                                <div class="task-description">Estudio detallado de la documentación oficial de SIFEN Paraguay, XML v150, y requisitos normativos</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🏗️</div>
+                            <div class="task-content">
+                                <div class="task-title">Diseño de Arquitectura del Sistema</div>
+                                <div class="task-description">Definición de servicios, controladores, modelos y estructura de base de datos para SIFEN</div>
+                                <div class="task-details">
+                                    <span class="task-time">3 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">⚙️</div>
+                            <div class="task-content">
+                                <div class="task-title">Configuración Inicial del Proyecto</div>
+                                <div class="task-description">Setup de Laravel, dependencias, estructura de directorios y configuraciones base</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🗄️</div>
+                            <div class="task-content">
+                                <div class="task-title">Diseño de Base de Datos</div>
+                                <div class="task-description">Creación de migraciones para documentos electrónicos, eventos, empresas y certificados</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🔐</div>
+                            <div class="task-content">
+                                <div class="task-title">Análisis de Seguridad y Certificados</div>
+                                <div class="task-description">Investigación de manejo de certificados P12, firma digital XML y autenticación</div>
+                                <div class="task-details">
+                                    <span class="task-time">1 día</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="deliverables">
+                        <h4>📦 Entregables de la Fase 1:</h4>
+                        <div class="deliverable-grid">
+                            <div class="deliverable-item">✅ Documento de Arquitectura del Sistema</div>
+                            <div class="deliverable-item">✅ Diagrama de Base de Datos</div>
+                            <div class="deliverable-item">✅ Proyecto Laravel Configurado</div>
+                            <div class="deliverable-item">✅ Migraciones de Base de Datos</div>
+                            <div class="deliverable-item">✅ Plan de Seguridad y Certificados</div>
+                            <div class="deliverable-item">✅ Configuración de Desarrollo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 2: DESARROLLO CORE -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-number">2</div>
+                    <div class="phase-info">
+                        <div class="phase-title">⚙️ Desarrollo de Funcionalidades Core</div>
+                        <div class="phase-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>Semanas 3-6 (20 días hábiles)</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👤</span>
+                                <span>1 Desarrollador Senior</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⚡</span>
+                                <span>160 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase-budget">
+                        <div style="font-size: 1.2rem;">$4,800</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">USD</div>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <div class="task-icon">📄</div>
+                            <div class="task-content">
+                                <div class="task-title">Generación de XML v150 y CDC</div>
+                                <div class="task-description">Implementación del servicio SifenService para generar XMLs conforme a especificación y cálculo de CDC de 44 dígitos</div>
+                                <div class="task-details">
+                                    <span class="task-time">5 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🔐</div>
+                            <div class="task-content">
+                                <div class="task-title">Sistema de Firma Digital</div>
+                                <div class="task-description">SifenCertificateService para manejo de certificados P12 y firma XML Signature según estándares</div>
+                                <div class="task-details">
+                                    <span class="task-time">4 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🌐</div>
+                            <div class="task-content">
+                                <div class="task-title">Integración Web Services SIFEN</div>
+                                <div class="task-description">SifenWebService con los 6 servicios: siRecepDE, siRecepLoteDE, siResultLoteDE, siConsDE, siConsRUC, siRecepEvento</div>
+                                <div class="task-details">
+                                    <span class="task-time">6 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">📊</div>
+                            <div class="task-content">
+                                <div class="task-title">Modelos de Datos y Relaciones</div>
+                                <div class="task-description">ElectronicDocument, DocumentEvent, Company con todas las relaciones y validaciones de negocio</div>
+                                <div class="task-details">
+                                    <span class="task-time">3 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🔧</div>
+                            <div class="task-content">
+                                <div class="task-title">API REST Básica</div>
+                                <div class="task-description">Controladores para crear, enviar y consultar documentos electrónicos con autenticación JWT</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="deliverables">
+                        <h4>📦 Entregables de la Fase 2:</h4>
+                        <div class="deliverable-grid">
+                            <div class="deliverable-item">✅ Servicio de Generación XML v150</div>
+                            <div class="deliverable-item">✅ Sistema de Firma Digital P12</div>
+                            <div class="deliverable-item">✅ Integración 6 Web Services SIFEN</div>
+                            <div class="deliverable-item">✅ Modelos de Datos Completos</div>
+                            <div class="deliverable-item">✅ API REST Funcional</div>
+                            <div class="deliverable-item">✅ Sistema de Autenticación JWT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 3: FUNCIONALIDADES AVANZADAS -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-number">3</div>
+                    <div class="phase-info">
+                        <div class="phase-title">🚀 Funcionalidades Avanzadas</div>
+                        <div class="phase-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>Semanas 7-9 (15 días hábiles)</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👤</span>
+                                <span>1 Desarrollador Senior</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⚡</span>
+                                <span>120 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase-budget">
+                        <div style="font-size: 1.2rem;">$3,600</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">USD</div>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <div class="task-icon">🎨</div>
+                            <div class="task-content">
+                                <div class="task-title">Generación KuDE y Códigos QR</div>
+                                <div class="task-description">SifenKudeService para crear representación gráfica PDF y códigos QR según capítulo 13.8 de SIFEN</div>
+                                <div class="task-details">
+                                    <span class="task-time">4 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">📝</div>
+                            <div class="task-content">
+                                <div class="task-title">Nota de Crédito Electrónica (NCE)</div>
+                                <div class="task-description">SifenNCEService completo con tipos E401/E402, validaciones específicas y eventos automáticos</div>
+                                <div class="task-details">
+                                    <span class="task-time">5 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">⚡</div>
+                            <div class="task-content">
+                                <div class="task-title">Sistema de Eventos Completo</div>
+                                <div class="task-description">SifenEventService para cancelaciones, inutilizaciones, eventos automáticos y notificaciones</div>
+                                <div class="task-details">
+                                    <span class="task-time">4 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🔧</div>
+                            <div class="task-content">
+                                <div class="task-title">API Avanzada Completa</div>
+                                <div class="task-description">SifenAdvancedController con todos los endpoints para NCE, eventos, lotes y consultas</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="deliverables">
+                        <h4>📦 Entregables de la Fase 3:</h4>
+                        <div class="deliverable-grid">
+                            <div class="deliverable-item">✅ Generador KuDE y QR</div>
+                            <div class="deliverable-item">✅ Sistema NCE Completo</div>
+                            <div class="deliverable-item">✅ Sistema de Eventos SIFEN</div>
+                            <div class="deliverable-item">✅ API Avanzada</div>
+                            <div class="deliverable-item">✅ Procesamiento en Lotes</div>
+                            <div class="deliverable-item">✅ Validaciones Automáticas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 4: DASHBOARD Y ADMINISTRACIÓN -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-number">4</div>
+                    <div class="phase-info">
+                        <div class="phase-title">🖥️ Dashboard y Herramientas de Administración</div>
+                        <div class="phase-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>Semanas 10-11 (10 días hábiles)</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👤</span>
+                                <span>1 Desarrollador Senior</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⚡</span>
+                                <span>80 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase-budget">
+                        <div style="font-size: 1.2rem;">$2,400</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">USD</div>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <div class="task-icon">📊</div>
+                            <div class="task-content">
+                                <div class="task-title">Dashboard Web de Administración</div>
+                                <div class="task-description">SifenDashboardController con panel de control, estadísticas y gestión visual de documentos</div>
+                                <div class="task-details">
+                                    <span class="task-time">4 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">⚙️</div>
+                            <div class="task-content">
+                                <div class="task-title">Comandos Artisan Especializados</div>
+                                <div class="task-description">SifenSetupCommand, SifenTestCommand, SifenCompanyCommand para configuración y mantenimiento</div>
+                                <div class="task-details">
+                                    <span class="task-time">3 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">📱</div>
+                            <div class="task-content">
+                                <div class="task-title">Interfaz Responsive y UX</div>
+                                <div class="task-description">Diseño moderno y responsive para dashboard con navegación intuitiva y alertas visuales</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🔍</div>
+                            <div class="task-content">
+                                <div class="task-title">Sistema de Monitoreo y Logs</div>
+                                <div class="task-description">Logging avanzado, alertas automáticas y herramientas de diagnóstico del sistema</div>
+                                <div class="task-details">
+                                    <span class="task-time">1 día</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="deliverables">
+                        <h4>📦 Entregables de la Fase 4:</h4>
+                        <div class="deliverable-grid">
+                            <div class="deliverable-item">✅ Dashboard Web Completo</div>
+                            <div class="deliverable-item">✅ Comandos de Administración</div>
+                            <div class="deliverable-item">✅ Interfaz Responsive</div>
+                            <div class="deliverable-item">✅ Sistema de Monitoreo</div>
+                            <div class="deliverable-item">✅ Herramientas de Diagnóstico</div>
+                            <div class="deliverable-item">✅ Scripts de Mantenimiento</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 5: TESTING Y CERTIFICACIÓN -->
+            <div class="phase">
+                <div class="phase-header">
+                    <div class="phase-number">5</div>
+                    <div class="phase-info">
+                        <div class="phase-title">🧪 Testing, Documentación y Certificación</div>
+                        <div class="phase-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span>Semana 12 (5 días hábiles)</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">👤</span>
+                                <span>1 Desarrollador Senior</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⚡</span>
+                                <span>40 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase-budget">
+                        <div style="font-size: 1.2rem;">$1,200</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">USD</div>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <div class="task-icon">🧪</div>
+                            <div class="task-content">
+                                <div class="task-title">Testing Exhaustivo del Sistema</div>
+                                <div class="task-description">Pruebas unitarias, de integración y funcionales. Testing con certificados de prueba en ambiente SIFEN</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">📚</div>
+                            <div class="task-content">
+                                <div class="task-title">Documentación Completa</div>
+                                <div class="task-description">Manual de instalación, configuración, uso de API, troubleshooting y guía de certificación</div>
+                                <div class="task-details">
+                                    <span class="task-time">2 días</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon">🎯</div>
+                            <div class="task-content">
+                                <div class="task-title">Preparación para Certificación</div>
+                                <div class="task-description">Configuración para producción, scripts de deployment y preparación para certificación oficial SET</div>
+                                <div class="task-details">
+                                    <span class="task-time">1 día</span>
+                                    <span class="task-resource">Desarrollador Senior</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="deliverables">
+                        <h4>📦 Entregables de la Fase 5:</h4>
+                        <div class="deliverable-grid">
+                            <div class="deliverable-item">✅ Suite de Testing Completa</div>
+                            <div class="deliverable-item">✅ Manual de Instalación</div>
+                            <div class="deliverable-item">✅ Documentación de API</div>
+                            <div class="deliverable-item">✅ Guía de Certificación</div>
+                            <div class="deliverable-item">✅ Scripts de Deployment</div>
+                            <div class="deliverable-item">✅ Sistema Listo para Producción</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Summary -->
+        <div class="cost-summary">
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 2rem;">💰 Resumen de Costos</h2>
+            
+            <div class="cost-grid">
+                <div class="cost-card">
+                    <div class="cost-number">480</div>
+                    <div class="cost-label">Total de Horas</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-number">$30</div>
+                    <div class="cost-label">Hora de Desarrollo</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-number">12</div>
+                    <div class="cost-label">Semanas de Duración</div>
+                </div>
+                <div class="cost-card">
+                    <div class="cost-number">25+</div>
+                    <div class="cost-label">Módulos Implementados</div>
+                </div>
+            </div>
+
+            <div class="total-cost">
+                <div class="total-amount">$14,400</div>
+                <div style="font-size: 1.2rem; opacity: 0.9;">Costo Total del Proyecto</div>
+                <div style="font-size: 1rem; opacity: 0.7; margin-top: 10px;">Incluye implementación completa y documentación</div>
+            </div>
+        </div>
+
+        <!-- Payment Terms -->
+        <div class="payment-terms">
+            <h3>💳 Términos de Pago Propuestos</h3>
+            <div class="payment-schedule">
+                <div class="payment-item">
+                    <div style="font-weight: 600; color: #22543d; margin-bottom: 5px;">30% Inicial</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #2d5016;">$4,320</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Al inicio del proyecto</div>
+                </div>
+                <div class="payment-item">
+                    <div style="font-weight: 600; color: #22543d; margin-bottom: 5px;">40% Intermedio</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #2d5016;">$5,760</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Al completar Fase 3</div>
+                </div>
+                <div class="payment-item">
+                    <div style="font-weight: 600; color: #22543d; margin-bottom: 5px;">30% Final</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #2d5016;">$4,320</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Al entregar sistema completo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assumptions -->
+        <div class="assumptions">
+            <h3>📋 Consideraciones y Supuestos</h3>
+            <ul>
+                <li><strong>Certificados de Prueba:</strong> El cliente proporcionará certificados P12 de prueba del SET Paraguay</li>
+                <li><strong>Acceso a Documentación:</strong> Disponibilidad de documentación oficial SIFEN actualizada</li>
+                <li><strong>Ambiente de Testing:</strong> Acceso al ambiente de pruebas de SIFEN Paraguay</li>
+                <li><strong>Certificación Final:</strong> La certificación oficial con SET Paraguay es responsabilidad del cliente</li>
+                <li><strong>Infraestructura:</strong> Servidor y base de datos proporcionados por el cliente</li>
+                <li><strong>Soporte Post-Implementación:</strong> 30 días de soporte incluidos después de la entrega</li>
+                <li><strong>Cambios de Alcance:</strong> Modificaciones significativas se cotizarán por separado</li>
+                <li><strong>Comunicación:</strong> Reuniones semanales de seguimiento incluidas</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

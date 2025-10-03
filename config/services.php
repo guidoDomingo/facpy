@@ -31,4 +31,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sifen' => [
+        'test_url' => env('SIFEN_TEST_URL', 'https://sifen-test.set.gov.py/de/ws/'),
+        'prod_url' => env('SIFEN_PROD_URL', 'https://sifen.set.gov.py/de/ws/'),
+        'default_env' => env('SIFEN_DEFAULT_ENV', 'test'),
+        'timeout' => env('SIFEN_TIMEOUT', 30),
+        'max_retry' => env('SIFEN_MAX_RETRY', 3),
+        'batch_size' => env('SIFEN_BATCH_SIZE', 15),
+    ],
+
 ];
